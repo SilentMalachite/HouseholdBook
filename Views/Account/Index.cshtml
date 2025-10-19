@@ -1,0 +1,38 @@
+@model IEnumerable<HouseholdBook.Models.Account>
+
+@{
+    ViewData["Title"] = "口座管理";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>口座一覧</h1>
+    <a asp-action="Create" class="btn btn-primary">口座を追加</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>名称</th>
+            <th>種類</th>
+            <th class="text-end">初期残高</th>
+            <th class="text-end">現在残高</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var account in Model)
+        {
+            <tr>
+                <td>@account.Name</td>
+                <td>@account.Type</td>
+                <td class="text-end">¥@account.InitialBalance.ToString("N0")</td>
+                <td class="text-end">¥@account.CurrentBalance.ToString("N0")</td>
+                <td class="text-end">
+                    <a asp-action="BalanceHistory" asp-route-id="@account.Id" class="btn btn-sm btn-outline-primary">残高推移</a>
+                    <a asp-action="Edit" asp-route-id="@account.Id" class="btn btn-sm btn-outline-secondary">編集</a>
+                    <a asp-action="Delete" asp-route-id="@account.Id" class="btn btn-sm btn-outline-danger">削除</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

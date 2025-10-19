@@ -1,0 +1,37 @@
+@model HouseholdBook.Models.Budget
+
+@{
+    ViewData["Title"] = "予算の追加";
+}
+
+<h1>予算の追加</h1>
+
+<form asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="Year" class="form-label">年</label>
+        <input asp-for="Year" class="form-control" />
+        <span asp-validation-for="Year" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Month" class="form-label">月</label>
+        <input asp-for="Month" class="form-control" />
+        <span asp-validation-for="Month" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label">カテゴリ</label>
+        <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId"></select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Amount" class="form-label">金額</label>
+        <input asp-for="Amount" class="form-control" />
+        <span asp-validation-for="Amount" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">保存</button>
+    <a asp-action="Index" class="btn btn-secondary">戻る</a>
+</form>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

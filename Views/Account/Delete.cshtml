@@ -1,0 +1,26 @@
+@model HouseholdBook.Models.Account
+
+@{
+    ViewData["Title"] = "口座の削除";
+}
+
+<h1>口座の削除</h1>
+
+<div class="alert alert-warning">
+    <p>この口座を削除すると関連データが失われる可能性があります。本当に削除しますか？</p>
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">名称</dt>
+    <dd class="col-sm-9">@Model.Name</dd>
+    <dt class="col-sm-3">種類</dt>
+    <dd class="col-sm-9">@Model.Type</dd>
+    <dt class="col-sm-3">現在残高</dt>
+    <dd class="col-sm-9">¥@Model.CurrentBalance.ToString("N0")</dd>
+</dl>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">削除</button>
+    <a asp-action="Index" class="btn btn-secondary">キャンセル</a>
+</form>

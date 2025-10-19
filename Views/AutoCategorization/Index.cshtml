@@ -1,0 +1,39 @@
+@model IEnumerable<HouseholdBook.Models.AutoCategorizationRule>
+
+@{
+    ViewData["Title"] = "自動分類ルール";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>自動分類ルール</h1>
+    <a asp-action="Create" class="btn btn-primary">ルールを追加</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>キーワード</th>
+            <th>カテゴリ</th>
+            <th class="text-end">優先度</th>
+            <th class="text-end">一致回数</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var rule in Model)
+        {
+            <tr>
+                <td>@rule.Keyword</td>
+                <td>@rule.Category.Name</td>
+                <td class="text-end">@rule.Priority</td>
+                <td class="text-end">@rule.MatchCount</td>
+                <td class="text-end">
+                    <form asp-action="Delete" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@rule.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('このルールを削除しますか？');">削除</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

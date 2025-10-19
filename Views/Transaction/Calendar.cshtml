@@ -1,0 +1,274 @@
+@model IEnumerable<HouseholdBook.Models.Transaction>
+
+@{
+    ViewData["Title"] = "カレンダー";
+    var currentYear = (int)ViewData["CurrentYear"]!;
+    var currentMonth = (int)ViewData["CurrentMonth"]!;
+    var firstDayOfMonth = new DateTime(currentYear, currentMonth, 1);
+    var daysInMonth = DateTime.DaysInMonth(currentYear, currentMonth);
+    var startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+    var prevMonth = currentMonth == 1 ? 12 : currentMonth - 1;
+    var prevYear = currentMonth == 1 ? currentYear - 1 : currentYear;
+    var nextMonth = currentMonth == 12 ? 1 : currentMonth + 1;
+    var nextYear = currentMonth == 12 ? currentYear + 1 : currentYear;
+    var monthName = new DateTime(currentYear, currentMonth, 1).ToString("yyyy年MM月");
+    
+    var transactionsByDate = Model.GroupBy(t => t.Date.Date)
+        .ToDictionary(g => g.Key, g => g.ToList());
+}
+
+<style>
+    .calendar-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .calendar-day-header {
+        text-align: center;
+        font-weight: bold;
+        padding: 10px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+    }
+    .calendar-day {
+        min-height: 100px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 8px;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .calendar-day:hover {
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    .calendar-day.empty {
+        background-color: #f8f9fa;
+        cursor: default;
+    }
+    .calendar-day.empty:hover {
+        background-color: #f8f9fa;
+        box-shadow: none;
+        transform: none;
+    }
+    .calendar-day.today {
+        border: 2px solid #0d6efd;
+        background-color: #e7f3ff;
+    }
+    .day-number {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .day-transactions {
+        font-size: 12px;
+    }
+    .transaction-item {
+        padding: 3px 6px;
+        margin: 2px 0;
+        border-radius: 3px;
+        background-color: #e9ecef;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .transaction-item.income {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    .transaction-item.expense {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    .day-total {
+        margin-top: 5px;
+        padding-top: 5px;
+        border-top: 1px solid #dee2e6;
+        font-weight: bold;
+        font-size: 13px;
+    }
+    .modal-transaction-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .transaction-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+        background-color: #fff;
+    }
+    .btn-group-sm {
+        gap: 5px;
+    }
+</style>
+
+<div class="calendar-container">
+    <div class="calendar-header">
+        <a href="@Url.Action("Calendar", new { year = prevYear, month = prevMonth })" class="btn btn-outline-primary">
+            ← 前月
+        </a>
+        <h2>@monthName</h2>
+        <a href="@Url.Action("Calendar", new { year = nextYear, month = nextMonth })" class="btn btn-outline-primary">
+            次月 →
+        </a>
+    </div>
+
+    <div class="calendar-grid">
+        <div class="calendar-day-header">日</div>
+        <div class="calendar-day-header">月</div>
+        <div class="calendar-day-header">火</div>
+        <div class="calendar-day-header">水</div>
+        <div class="calendar-day-header">木</div>
+        <div class="calendar-day-header">金</div>
+        <div class="calendar-day-header">土</div>
+
+        @for (int i = 0; i < startDayOfWeek; i++)
+        {
+            <div class="calendar-day empty"></div>
+        }
+
+        @for (int day = 1; day <= daysInMonth; day++)
+        {
+            var currentDate = new DateTime(currentYear, currentMonth, day);
+            var isToday = currentDate.Date == DateTime.Today;
+            var dayTransactions = transactionsByDate.ContainsKey(currentDate.Date) 
+                ? transactionsByDate[currentDate.Date] 
+                : new List<HouseholdBook.Models.Transaction>();
+            var dayTotal = dayTransactions.Sum(t => t.Amount);
+            
+            <div class="calendar-day @(isToday ? "today" : "")" 
+                 data-date="@currentDate.ToString("yyyy-MM-dd")" 
+                 onclick="showDayModal('@currentDate.ToString("yyyy-MM-dd")', '@currentDate.ToString("MM月dd日")')">
+                <div class="day-number">@day</div>
+                <div class="day-transactions">
+                    @foreach (var transaction in dayTransactions.Take(2))
+                    {
+                        <div class="transaction-item @(transaction.Amount >= 0 ? "income" : "expense")">
+                            @transaction.Category.Name: ¥@Math.Abs(transaction.Amount).ToString("N0")
+                        </div>
+                    }
+                    @if (dayTransactions.Count > 2)
+                    {
+                        <div class="transaction-item">+@(dayTransactions.Count - 2)件</div>
+                    }
+                </div>
+                @if (dayTransactions.Any())
+                {
+                    <div class="day-total" style="color: @(dayTotal >= 0 ? "#198754" : "#dc3545")">
+                        合計: ¥@dayTotal.ToString("N0")
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="text-center mt-3">
+        <a asp-action="Index" class="btn btn-secondary">リスト表示に戻る</a>
+    </div>
+</div>
+
+<!-- Modal for day details -->
+<div class="modal fade" id="dayModal" tabindex="-1" aria-labelledby="dayModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dayModalLabel">取引詳細</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <button class="btn btn-primary" id="addTransactionBtn">
+                        ＋ 新規取引を追加
+                    </button>
+                </div>
+                <div id="transactionList" class="modal-transaction-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentSelectedDate = '';
+        let dayModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            dayModal = new bootstrap.Modal(document.getElementById('dayModal'));
+            
+            document.getElementById('addTransactionBtn').addEventListener('click', function() {
+                window.location.href = '@Url.Action("CreateForDate")' + '?date=' + currentSelectedDate;
+            });
+        });
+
+        function showDayModal(date, displayDate) {
+            currentSelectedDate = date;
+            document.getElementById('dayModalLabel').textContent = displayDate + 'の取引';
+            
+            fetch('@Url.Action("GetTransactionsForDate")' + '?date=' + date)
+                .then(response => response.json())
+                .then(transactions => {
+                    const listContainer = document.getElementById('transactionList');
+                    
+                    if (transactions.length === 0) {
+                        listContainer.innerHTML = '<p class="text-muted text-center">この日の取引はありません</p>';
+                    } else {
+                        let total = 0;
+                        let html = '';
+                        
+                        transactions.forEach(t => {
+                            total += t.amount;
+                            const amountClass = t.amount >= 0 ? 'text-success' : 'text-danger';
+                            html += `
+                                <div class="transaction-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">${t.categoryName}</h6>
+                                            <p class="mb-1 text-muted small">${t.accountName}</p>
+                                            <p class="mb-1 text-muted small">${t.description || '説明なし'}</p>
+                                            <p class="mb-0 ${amountClass} fw-bold">¥${Math.abs(t.amount).toLocaleString()}</p>
+                                        </div>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="@Url.Action("Edit")/${t.id}" class="btn btn-outline-primary btn-sm">編集</a>
+                                            <a href="@Url.Action("Delete")/${t.id}" class="btn btn-outline-danger btn-sm">削除</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        const totalClass = total >= 0 ? 'text-success' : 'text-danger';
+                        html += `
+                            <div class="alert alert-light mt-3">
+                                <strong>合計:</strong> <span class="${totalClass}">¥${total.toLocaleString()}</span>
+                            </div>
+                        `;
+                        
+                        listContainer.innerHTML = html;
+                    }
+                    
+                    dayModal.show();
+                })
+                .catch(error => {
+                    console.error('Error loading transactions:', error);
+                    alert('取引の読み込みに失敗しました');
+                });
+        }
+    </script>
+}

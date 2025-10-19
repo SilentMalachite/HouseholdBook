@@ -1,0 +1,42 @@
+@model HouseholdBook.Models.Transaction
+
+@{
+    ViewData["Title"] = "詳細";
+}
+
+<h1>取引詳細</h1>
+
+<div>
+    <h4>取引</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            金額
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Amount)
+        </dd>
+        <dt class = "col-sm-2">
+            日付
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Date)
+        </dd>
+        <dt class = "col-sm-2">
+            カテゴリ
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Category.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            説明
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">編集</a> |
+    <a asp-action="Index">一覧に戻る</a>
+</div>

@@ -1,0 +1,80 @@
+@model HouseholdBook.Models.ViewModels.SavingsGoalSummary
+
+@{
+    ViewData["Title"] = "貯蓄目標の詳細";
+}
+
+<h1>@Model.Goal.Name</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">目標額</dt>
+    <dd class="col-sm-9">¥@Model.Goal.TargetAmount.ToString("N0")</dd>
+    <dt class="col-sm-3">現在額</dt>
+    <dd class="col-sm-9">¥@Model.Goal.CurrentAmount.ToString("N0") (@Model.ProgressPercentage.ToString("F1")%)</dd>
+    <dt class="col-sm-3">残額</dt>
+    <dd class="col-sm-9">¥@Model.RemainingAmount.ToString("N0")</dd>
+    @if (Model.Goal.TargetDate.HasValue)
+    {
+        <dt class="col-sm-3">目標日</dt>
+        <dd class="col-sm-9">@Model.Goal.TargetDate.Value.ToString("yyyy/MM/dd")</dd>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.Goal.Notes))
+    {
+        <dt class="col-sm-3">メモ</dt>
+        <dd class="col-sm-9">@Model.Goal.Notes</dd>
+    }
+</dl>
+
+<h4>積立履歴</h4>
+
+@if (!Model.Goal.Contributions.Any())
+{
+    <p class="text-muted">まだ積立履歴がありません。</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>日付</th>
+                <th class="text-end">金額</th>
+                <th>備考</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contribution in Model.Goal.Contributions.OrderByDescending(c => c.ContributionDate))
+            {
+                <tr>
+                    <td>@contribution.ContributionDate.ToString("yyyy/MM/dd")</td>
+                    <td class="text-end">¥@contribution.Amount.ToString("N0")</td>
+                    <td>@contribution.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<h4>積立を追加</h4>
+
+<form asp-action="AddContribution" method="post">
+    <input type="hidden" name="id" value="@Model.Goal.Id" />
+    <div class="row g-2">
+        <div class="col-md-3">
+            <label class="form-label">日付</label>
+            <input type="date" name="contributionDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">金額</label>
+            <input type="number" name="amount" class="form-control" step="1000" min="0" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">備考</label>
+            <input type="text" name="description" class="form-control" />
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">追加</button>
+        </div>
+    </div>
+</form>
+
+<a asp-action="Index" class="btn btn-secondary mt-3">一覧に戻る</a>

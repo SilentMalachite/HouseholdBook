@@ -1,0 +1,37 @@
+@model HouseholdBook.Models.Account
+
+@{
+    ViewData["Title"] = "口座の編集";
+}
+
+<h1>口座の編集</h1>
+
+<form asp-action="Edit">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">名称</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Type" class="form-label">種類</label>
+        <select asp-for="Type" class="form-select">
+            <option value="Cash">現金</option>
+            <option value="Bank">銀行</option>
+            <option value="Credit">クレジット</option>
+            <option value="Investment">投資</option>
+        </select>
+        <span asp-validation-for="Type" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Notes" class="form-label">メモ</label>
+        <textarea asp-for="Notes" class="form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">保存</button>
+    <a asp-action="Index" class="btn btn-secondary">戻る</a>
+</form>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

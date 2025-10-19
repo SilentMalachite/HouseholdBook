@@ -1,0 +1,37 @@
+@model IEnumerable<HouseholdBook.Models.ViewModels.SavingsGoalSummary>
+
+@{
+    ViewData["Title"] = "貯蓄目標";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>貯蓄目標</h1>
+    <a asp-action="Create" class="btn btn-primary">新規目標を追加</a>
+</div>
+
+<div class="row">
+    @foreach (var summary in Model)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">@summary.Goal.Name</h5>
+                    <p class="card-text">目標額: ¥@summary.Goal.TargetAmount.ToString("N0")</p>
+                    <p class="card-text">現在: ¥@summary.Goal.CurrentAmount.ToString("N0") (@summary.ProgressPercentage.ToString("F1")%)</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar" style="width: @Math.Min(summary.ProgressPercentage, 100)%;" aria-valuenow="@summary.ProgressPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    @if (summary.Goal.TargetDate.HasValue)
+                    {
+                        <p class="card-text">目標達成日: @summary.Goal.TargetDate.Value.ToString("yyyy/MM/dd")</p>
+                    }
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <a asp-action="Details" asp-route-id="@summary.Goal.Id" class="btn btn-sm btn-outline-primary">詳細</a>
+                    <a asp-action="Edit" asp-route-id="@summary.Goal.Id" class="btn btn-sm btn-outline-secondary">編集</a>
+                    <a asp-action="Delete" asp-route-id="@summary.Goal.Id" class="btn btn-sm btn-outline-danger">削除</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

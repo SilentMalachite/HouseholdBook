@@ -1,0 +1,59 @@
+@model IEnumerable<HouseholdBook.Models.Transaction>
+
+@{
+    ViewData["Title"] = "取引";
+}
+
+<h1>取引</h1>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a asp-action="Create" class="btn btn-primary">新規作成</a>
+    <a asp-action="ExportCsv" class="btn btn-outline-primary">CSV エクスポート</a>
+    <a asp-action="ExportWorksheet" class="btn btn-outline-success">Excel エクスポート</a>
+    <form asp-action="ImportCsv" method="post" enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
+        <input type="file" name="file" accept=".csv" class="form-control" />
+        <button type="submit" class="btn btn-outline-secondary">CSV インポート</button>
+    </form>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                金額
+            </th>
+            <th>
+                日付
+            </th>
+            <th>
+                カテゴリ
+            </th>
+            <th>
+                説明
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Amount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Date)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Category.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">編集</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">詳細</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">削除</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

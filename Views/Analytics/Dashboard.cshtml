@@ -1,0 +1,144 @@
+@model HouseholdBook.Models.ViewModels.HouseholdInsight
+
+@{
+    ViewData["Title"] = "家計分析";
+    var comparative = (HouseholdBook.Models.ViewModels.ComparativeReport)ViewData["Comparative"]!;
+    var alerts = (IEnumerable<HouseholdBook.Models.Alert>)ViewData["Alerts"]!;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>@Model.Year 年 @Model.Month 月の家計分析</h1>
+    <div>
+        <a class="btn btn-outline-primary" asp-action="Dashboard" asp-route-year="@(Model.Month == 1 ? Model.Year - 1 : Model.Year)" asp-route-month="@(Model.Month == 1 ? 12 : Model.Month - 1)">← 前月</a>
+        <a class="btn btn-outline-primary" asp-action="Dashboard" asp-route-year="@(Model.Month == 12 ? Model.Year + 1 : Model.Year)" asp-route-month="@(Model.Month == 12 ? 1 : Model.Month + 1)">次月 →</a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">総収入</h5>
+                <p class="card-text text-success fs-4">¥@Model.TotalIncome.ToString("N0")</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">総支出</h5>
+                <p class="card-text text-danger fs-4">¥@(-Model.TotalExpense).ToString("N0")</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">収支差額</h5>
+                <p class="card-text @(Model.NetAmount >= 0 ? "text-success" : "text-danger") fs-4">¥@Model.NetAmount.ToString("N0")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">アラート</div>
+            <div class="card-body">
+                @if (!alerts.Any())
+                {
+                    <p class="text-muted">現在アラートはありません。</p>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var alert in alerts)
+                        {
+                            <li class="list-group-item">
+                                <strong>[@alert.Type]</strong> @alert.Message
+                                <span class="text-muted d-block small">@alert.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">家計診断</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    @foreach (var advice in Model.Advice)
+                    {
+                        <li class="list-group-item">@advice</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">期間比較レポート</div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>@comparative.Current.Year 年 @comparative.Current.Month 月</th>
+                        <th>@comparative.PreviousMonth.Year 年 @comparative.PreviousMonth.Month 月</th>
+                        <th>@comparative.PreviousYear.Year 年 @comparative.PreviousYear.Month 月</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>収入</th>
+                        <td>¥@comparative.Current.TotalIncome.ToString("N0")</td>
+                        <td>¥@comparative.PreviousMonth.TotalIncome.ToString("N0")</td>
+                        <td>¥@comparative.PreviousYear.TotalIncome.ToString("N0")</td>
+                    </tr>
+                    <tr>
+                        <th>支出</th>
+                        <td>¥@(-comparative.Current.TotalExpense).ToString("N0")</td>
+                        <td>¥@(-comparative.PreviousMonth.TotalExpense).ToString("N0")</td>
+                        <td>¥@(-comparative.PreviousYear.TotalExpense).ToString("N0")</td>
+                    </tr>
+                    <tr>
+                        <th>収支差額</th>
+                        <td>¥@comparative.Current.NetAmount.ToString("N0")</td>
+                        <td>¥@comparative.PreviousMonth.NetAmount.ToString("N0")</td>
+                        <td>¥@comparative.PreviousYear.NetAmount.ToString("N0")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.createElement('canvas');
+        document.querySelector('.card-body').appendChild(ctx);
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['現月', '前月', '前年同月'],
+                datasets: [{
+                    label: '収支差額',
+                    data: [
+                        @comparative.Current.NetAmount,
+                        @comparative.PreviousMonth.NetAmount,
+                        @comparative.PreviousYear.NetAmount
+                    ],
+                    borderColor: 'rgba(13,110,253,1)',
+                    backgroundColor: 'rgba(13,110,253,0.2)',
+                    tension: 0.3
+                }]
+            }
+        });
+    </script>
+}

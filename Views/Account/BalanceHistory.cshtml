@@ -1,0 +1,68 @@
+@model IEnumerable<HouseholdBook.Models.AccountBalanceSnapshot>
+
+@{
+    ViewData["Title"] = "残高推移";
+    var account = (HouseholdBook.Models.Account)ViewData["Account"]!;
+}
+
+<h1>@account.Name の残高推移</h1>
+
+<p>現在残高: <strong>¥@account.CurrentBalance.ToString("N0")</strong></p>
+
+<div class="card mb-4">
+    <div class="card-header">残高履歴</div>
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <p class="text-muted">記録がありません。</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>記録日</th>
+                            <th class="text-end">残高</th>
+                            <th>備考</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var snapshot in Model)
+                        {
+                            <tr>
+                                <td>@snapshot.SnapshotDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
+                                <td class="text-end">¥@snapshot.Balance.ToString("N0")</td>
+                                <td>@snapshot.Notes</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">残高照合</div>
+    <div class="card-body">
+        <form asp-action="Reconcile" method="post">
+            <input type="hidden" name="id" value="@account.Id" />
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label class="form-label">実際の残高</label>
+                    <input type="number" class="form-control" name="actualBalance" step="1" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">備考</label>
+                    <input type="text" class="form-control" name="notes" />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">記録</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary mt-3">一覧に戻る</a>

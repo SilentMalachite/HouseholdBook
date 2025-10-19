@@ -1,0 +1,33 @@
+@model HouseholdBook.Models.Category
+
+@{
+    ViewData["Title"] = "削除";
+}
+
+<h1>削除</h1>
+
+<h3>このカテゴリを削除してもよろしいですか？</h3>
+<div>
+    <h4>カテゴリ</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            名前
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            タイプ
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Type)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="削除" class="btn btn-danger" /> |
+        <a asp-action="Index">一覧に戻る</a>
+    </form>
+</div>

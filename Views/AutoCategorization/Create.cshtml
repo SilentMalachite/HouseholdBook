@@ -1,0 +1,32 @@
+@model HouseholdBook.Models.AutoCategorizationRule
+
+@{
+    ViewData["Title"] = "自動分類ルールの追加";
+}
+
+<h1>自動分類ルールの追加</h1>
+
+<form asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="Keyword" class="form-label">キーワード</label>
+        <input asp-for="Keyword" class="form-control" />
+        <span asp-validation-for="Keyword" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label">カテゴリ</label>
+        <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId"></select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Priority" class="form-label">優先度 (高いほど優先)</label>
+        <input asp-for="Priority" class="form-control" />
+        <span asp-validation-for="Priority" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">保存</button>
+    <a asp-action="Index" class="btn btn-secondary">戻る</a>
+</form>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

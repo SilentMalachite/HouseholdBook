@@ -1,0 +1,26 @@
+@model HouseholdBook.Models.SavingsGoal
+
+@{
+    ViewData["Title"] = "貯蓄目標の削除";
+}
+
+<h1>貯蓄目標の削除</h1>
+
+<div class="alert alert-warning">
+    <p>以下の貯蓄目標を削除してもよろしいですか？この操作は取り消せません。</p>
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">名称</dt>
+    <dd class="col-sm-9">@Model.Name</dd>
+    <dt class="col-sm-3">目標額</dt>
+    <dd class="col-sm-9">¥@Model.TargetAmount.ToString("N0")</dd>
+    <dt class="col-sm-3">現在額</dt>
+    <dd class="col-sm-9">¥@Model.CurrentAmount.ToString("N0")</dd>
+</dl>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">削除</button>
+    <a asp-action="Index" class="btn btn-secondary">キャンセル</a>
+</form>

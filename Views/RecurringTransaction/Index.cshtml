@@ -1,0 +1,39 @@
+@model IEnumerable<HouseholdBook.Models.RecurringTransaction>
+
+@{
+    ViewData["Title"] = "定期取引";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>定期取引</h1>
+    <a asp-action="Create" class="btn btn-primary">新規追加</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>カテゴリ</th>
+            <th>口座</th>
+            <th class="text-end">金額</th>
+            <th>頻度</th>
+            <th>次回実行日</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Category.Name</td>
+                <td>@item.Account.Name</td>
+                <td class="text-end">¥@item.Amount.ToString("N0")</td>
+                <td>@item.Frequency</td>
+                <td>@item.NextRunDate.ToString("yyyy/MM/dd")</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id">編集</a>
+                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">削除</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

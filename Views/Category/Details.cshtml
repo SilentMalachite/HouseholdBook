@@ -1,0 +1,30 @@
+@model HouseholdBook.Models.Category
+
+@{
+    ViewData["Title"] = "詳細";
+}
+
+<h1>カテゴリ詳細</h1>
+
+<div>
+    <h4>カテゴリ</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            名前
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            タイプ
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Type)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">編集</a> |
+    <a asp-action="Index">一覧に戻る</a>
+</div>

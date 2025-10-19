@@ -1,0 +1,118 @@
+@model HouseholdBook.Models.ViewModels.MonthlyReportViewModel
+
+@{
+    ViewData["Title"] = "月間サマリー";
+    var previousMonth = Model.Month == 1 ? 12 : Model.Month - 1;
+    var previousYear = Model.Month == 1 ? Model.Year - 1 : Model.Year;
+    var nextMonth = Model.Month == 12 ? 1 : Model.Month + 1;
+    var nextYear = Model.Month == 12 ? Model.Year + 1 : Model.Year;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <a class="btn btn-outline-primary" asp-action="MonthlySummary" asp-route-year="@previousYear" asp-route-month="@previousMonth">← 前月</a>
+    <h2>@Model.Year 年 @Model.Month 月のサマリー</h2>
+    <a class="btn btn-outline-primary" asp-action="MonthlySummary" asp-route-year="@nextYear" asp-route-month="@nextMonth">次月 →</a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">総収入</h5>
+                <p class="card-text text-success fs-4">¥@Model.TotalIncome.ToString("N0")</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">総支出</h5>
+                <p class="card-text text-danger fs-4">¥@(-Model.TotalExpense).ToString("N0")</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">収支差額</h5>
+                <p class="card-text @(Model.NetAmount >= 0 ? "text-success" : "text-danger") fs-4">¥@Model.NetAmount.ToString("N0")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>カテゴリ別の予算と実績</span>
+        <a class="btn btn-sm btn-primary" asp-controller="Budget" asp-action="Index">予算を管理</a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>カテゴリ</th>
+                        <th class="text-end">予算額</th>
+                        <th class="text-end">実績額</th>
+                        <th class="text-end">差額</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var summary in Model.CategorySummaries)
+                    {
+                        var differenceClass = summary.IsOverBudget ? "text-danger fw-bold" : string.Empty;
+                        <tr>
+                            <td>@summary.CategoryName</td>
+                            <td class="text-end">¥@summary.BudgetAmount.ToString("N0")</td>
+                            <td class="text-end">¥@summary.ActualAmount.ToString("N0")</td>
+                            <td class="text-end @differenceClass">¥@summary.Difference.ToString("N0")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const cardBody = document.querySelector('.card-body');
+        const canvas = document.createElement('canvas');
+        canvas.height = 240;
+        cardBody.appendChild(canvas);
+
+        const data = {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategorySummaries.Select(x => x.CategoryName))),
+            datasets: [{
+                label: '実績額',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategorySummaries.Select(x => x.ActualAmount))),
+                backgroundColor: 'rgba(13,110,253,0.3)',
+                borderColor: 'rgba(13,110,253,1)',
+                borderWidth: 1
+            }, {
+                label: '予算額',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategorySummaries.Select(x => x.BudgetAmount))),
+                backgroundColor: 'rgba(255,193,7,0.3)',
+                borderColor: 'rgba(255,193,7,1)',
+                borderWidth: 1
+            }]
+        };
+
+        new Chart(canvas, {
+            type: 'bar',
+            data,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => `¥${Number(value).toLocaleString()}`
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}
